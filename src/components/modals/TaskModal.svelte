@@ -33,6 +33,11 @@
   let loading = $state(false);
   let error = $state('');
   let lightboxSrc = $state<string | null>(null);
+  let openDropdown = $state<string | null>(null);
+
+  function toggleDropdown(name: string) {
+    openDropdown = openDropdown === name ? null : name;
+  }
 
   $effect(() => {
     if (!open) return;
@@ -142,7 +147,7 @@
   }
 
   function handleKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape') onClose();
+    if (e.key === 'Escape') { if (openDropdown) { openDropdown = null; } else { onClose(); } }
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleSubmit();
   }
 </script>
@@ -174,18 +179,18 @@
       </div>
 
       <!-- Body -->
-      <div class="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-4">
+      <div class="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
         {#if error}
           <div class="bg-[var(--red-soft)] text-[var(--red-deep)] text-sm px-3 py-2 rounded-lg">{error}</div>
         {/if}
 
         <!-- Title -->
-        <div class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1.5">
           <label class="text-xs font-medium text-[var(--ink-soft)]" for="td-title">Judul <span class="text-[var(--red)]">*</span></label>
           <input
             id="td-title"
             type="text"
-            class="w-full px-3 py-2 text-sm border border-[var(--line)] rounded-xl bg-[var(--card-soft)] text-[var(--ink)] placeholder-[var(--ink-faint)] focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition-colors"
+            class="w-full px-3.5 py-2.5 text-sm border border-[var(--line)] rounded-xl bg-white text-[var(--ink)] placeholder-[var(--ink-faint)] focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition-colors"
             bind:value={title}
             placeholder="Nama tugas"
             autofocus
@@ -193,74 +198,137 @@
         </div>
 
         <!-- Description -->
-        <div class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1.5">
           <label class="text-xs font-medium text-[var(--ink-soft)]" for="td-desc">Deskripsi</label>
           <textarea
             id="td-desc"
-            class="w-full px-3 py-2 text-sm border border-[var(--line)] rounded-xl bg-[var(--card-soft)] text-[var(--ink)] placeholder-[var(--ink-faint)] focus:outline-none focus:border-[var(--accent)] transition-colors resize-none"
+            class="w-full px-3.5 py-2.5 text-sm border border-[var(--line)] rounded-xl bg-white text-[var(--ink)] placeholder-[var(--ink-faint)] focus:outline-none focus:border-[var(--accent)] transition-colors resize-none"
             bind:value={description}
             placeholder="Detail, catatan, atau konteks tugas..."
             rows="3"
           ></textarea>
         </div>
 
-        <!-- Status + Due date row -->
+        <!-- Dropdowns: Status + Tenggat -->
         <div class="grid grid-cols-2 gap-3">
-          <div class="flex flex-col gap-1">
-            <label class="text-xs font-medium text-[var(--ink-soft)]" for="td-status">Status</label>
-            <select
-              id="td-status"
-              class="w-full px-3 py-2 text-sm border border-[var(--line)] rounded-xl bg-[var(--card-soft)] text-[var(--ink)] focus:outline-none focus:border-[var(--accent)] transition-colors"
-              bind:value={statusId}
+          <!-- Status -->
+          <div class="relative">
+            <label class="block text-xs font-medium text-[var(--ink-soft)] mb-1.5">Status</label>
+            <button
+              type="button"
+              class="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm border rounded-xl bg-white transition-colors {openDropdown === 'status' ? 'border-[var(--accent)] ring-1 ring-[var(--accent)]' : 'border-[var(--line)] hover:border-[var(--line-strong)]'}"
+              onclick={() => toggleDropdown('status')}
             >
-              <option value={null}>— Pilih status</option>
-              {#each proj.statuses as s}
-                <option value={s.id}>{s.name}</option>
-              {/each}
-            </select>
+              {#if proj.statuses.find(s => s.id === statusId)}
+                {@const s = proj.statuses.find(x => x.id === statusId)!}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white" style="background:{s.color}">{s.name}</span>
+              {:else}
+                <span class="text-[var(--ink-faint)]">— Pilih status</span>
+              {/if}
+              <i class="fa-solid fa-chevron-down text-[10px] text-[var(--ink-faint)] ml-auto transition-transform {openDropdown === 'status' ? 'rotate-180' : ''}"></i>
+            </button>
+            {#if openDropdown === 'status'}
+              <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+              <div class="absolute top-full left-0 right-0 mt-1 bg-white border border-[var(--line)] rounded-xl shadow-lg py-1 z-20" onclick={() => (openDropdown = null)}>
+                {#each proj.statuses as s}
+                  <button
+                    type="button"
+                    class="w-full flex items-center gap-2 px-3.5 py-2 text-sm hover:bg-[var(--card-soft)] transition-colors {statusId === s.id ? 'bg-[var(--accent-soft)]' : ''}"
+                    onclick={() => { statusId = s.id; }}
+                  >
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white" style="background:{s.color}">{s.name}</span>
+                    {#if statusId === s.id}
+                      <i class="fa-solid fa-check text-[var(--accent)] ml-auto text-xs"></i>
+                    {/if}
+                  </button>
+                {/each}
+              </div>
+            {/if}
           </div>
-          <div class="flex flex-col gap-1">
-            <label class="text-xs font-medium text-[var(--ink-soft)]" for="td-due">Tenggat</label>
+
+          <!-- Tenggat -->
+          <div>
+            <label class="block text-xs font-medium text-[var(--ink-soft)] mb-1.5" for="td-due">Tenggat</label>
             <input
               id="td-due"
               type="date"
-              class="w-full px-3 py-2 text-sm border border-[var(--line)] rounded-xl bg-[var(--card-soft)] text-[var(--ink)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+              class="w-full px-3.5 py-2.5 text-sm border border-[var(--line)] rounded-xl bg-white text-[var(--ink)] focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition-colors"
               bind:value={due}
             />
           </div>
         </div>
 
-        <!-- Priority + Category row -->
+        <!-- Dropdowns: Prioritas + Kategori -->
         {#if !proj.disable_priorities || !proj.disable_categories}
           <div class="grid grid-cols-2 gap-3">
             {#if !proj.disable_priorities}
-              <div class="flex flex-col gap-1">
-                <label class="text-xs font-medium text-[var(--ink-soft)]" for="td-priority">Prioritas</label>
-                <select
-                  id="td-priority"
-                  class="w-full px-3 py-2 text-sm border border-[var(--line)] rounded-xl bg-[var(--card-soft)] text-[var(--ink)] focus:outline-none focus:border-[var(--accent)] transition-colors"
-                  bind:value={priorityId}
+              <div class="relative">
+                <label class="block text-xs font-medium text-[var(--ink-soft)] mb-1.5">Prioritas</label>
+                <button
+                  type="button"
+                  class="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm border rounded-xl bg-white transition-colors {openDropdown === 'priority' ? 'border-[var(--accent)] ring-1 ring-[var(--accent)]' : 'border-[var(--line)] hover:border-[var(--line-strong)]'}"
+                  onclick={() => toggleDropdown('priority')}
                 >
-                  <option value={null}>— Pilih prioritas</option>
-                  {#each proj.priorities as p}
-                    <option value={p.id}>{p.name}</option>
-                  {/each}
-                </select>
+                  {#if proj.priorities.find(p => p.id === priorityId)}
+                    {@const p = proj.priorities.find(x => x.id === priorityId)!}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white" style="background:{p.color}">{p.name}</span>
+                  {:else}
+                    <span class="text-[var(--ink-faint)]">— Pilih</span>
+                  {/if}
+                  <i class="fa-solid fa-chevron-down text-[10px] text-[var(--ink-faint)] ml-auto transition-transform {openDropdown === 'priority' ? 'rotate-180' : ''}"></i>
+                </button>
+                {#if openDropdown === 'priority'}
+                  <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+                  <div class="absolute top-full left-0 right-0 mt-1 bg-white border border-[var(--line)] rounded-xl shadow-lg py-1 z-20" onclick={() => (openDropdown = null)}>
+                    {#each proj.priorities as p}
+                      <button
+                        type="button"
+                        class="w-full flex items-center gap-2 px-3.5 py-2 text-sm hover:bg-[var(--card-soft)] transition-colors {priorityId === p.id ? 'bg-[var(--accent-soft)]' : ''}"
+                        onclick={() => { priorityId = priorityId === p.id ? null : p.id; }}
+                      >
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white" style="background:{p.color}">{p.name}</span>
+                        {#if priorityId === p.id}
+                          <i class="fa-solid fa-check text-[var(--accent)] ml-auto text-xs"></i>
+                        {/if}
+                      </button>
+                    {/each}
+                  </div>
+                {/if}
               </div>
             {/if}
             {#if !proj.disable_categories}
-              <div class="flex flex-col gap-1">
-                <label class="text-xs font-medium text-[var(--ink-soft)]" for="td-category">Kategori</label>
-                <select
-                  id="td-category"
-                  class="w-full px-3 py-2 text-sm border border-[var(--line)] rounded-xl bg-[var(--card-soft)] text-[var(--ink)] focus:outline-none focus:border-[var(--accent)] transition-colors"
-                  bind:value={categoryId}
+              <div class="relative {proj.disable_priorities ? 'col-span-2' : ''}">
+                <label class="block text-xs font-medium text-[var(--ink-soft)] mb-1.5">Kategori</label>
+                <button
+                  type="button"
+                  class="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm border rounded-xl bg-white transition-colors {openDropdown === 'category' ? 'border-[var(--accent)] ring-1 ring-[var(--accent)]' : 'border-[var(--line)] hover:border-[var(--line-strong)]'}"
+                  onclick={() => toggleDropdown('category')}
                 >
-                  <option value={null}>— Pilih kategori</option>
-                  {#each proj.categories as c}
-                    <option value={c.id}>{c.name}</option>
-                  {/each}
-                </select>
+                  {#if proj.categories.find(c => c.id === categoryId)}
+                    {@const c = proj.categories.find(x => x.id === categoryId)!}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white" style="background:{c.color}">{c.name}</span>
+                  {:else}
+                    <span class="text-[var(--ink-faint)]">— Pilih</span>
+                  {/if}
+                  <i class="fa-solid fa-chevron-down text-[10px] text-[var(--ink-faint)] ml-auto transition-transform {openDropdown === 'category' ? 'rotate-180' : ''}"></i>
+                </button>
+                {#if openDropdown === 'category'}
+                  <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+                  <div class="absolute top-full left-0 right-0 mt-1 bg-white border border-[var(--line)] rounded-xl shadow-lg py-1 z-20" onclick={() => (openDropdown = null)}>
+                    {#each proj.categories as c}
+                      <button
+                        type="button"
+                        class="w-full flex items-center gap-2 px-3.5 py-2 text-sm hover:bg-[var(--card-soft)] transition-colors {categoryId === c.id ? 'bg-[var(--accent-soft)]' : ''}"
+                        onclick={() => { categoryId = categoryId === c.id ? null : c.id; }}
+                      >
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white" style="background:{c.color}">{c.name}</span>
+                        {#if categoryId === c.id}
+                          <i class="fa-solid fa-check text-[var(--accent)] ml-auto text-xs"></i>
+                        {/if}
+                      </button>
+                    {/each}
+                  </div>
+                {/if}
               </div>
             {/if}
           </div>
@@ -270,11 +338,11 @@
         {#if proj.members.length > 0}
           <div class="flex flex-col gap-1.5">
             <span class="text-xs font-medium text-[var(--ink-soft)]">Tag anggota</span>
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-1.5">
               {#each proj.members as m}
                 <button
                   type="button"
-                  class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border-2 transition-colors {tagIds.includes(m.id) ? 'border-transparent text-white' : 'border-[var(--line)] text-[var(--ink-soft)] bg-transparent hover:border-[var(--line-strong)]'}"
+                  class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors {tagIds.includes(m.id) ? 'border-transparent text-white' : 'border-[var(--line)] text-[var(--ink-soft)] bg-white hover:border-[var(--line-strong)]'}"
                   style={tagIds.includes(m.id) ? `background:${m.color};border-color:${m.color};` : ''}
                   onclick={() => toggleTag(m.id)}
                   aria-pressed={tagIds.includes(m.id)}
@@ -288,12 +356,12 @@
         {/if}
 
         <!-- Link -->
-        <div class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1.5">
           <label class="text-xs font-medium text-[var(--ink-soft)]" for="td-link">Tautan</label>
           <input
             id="td-link"
             type="url"
-            class="w-full px-3 py-2 text-sm border border-[var(--line)] rounded-xl bg-[var(--card-soft)] text-[var(--ink)] placeholder-[var(--ink-faint)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+            class="w-full px-3.5 py-2.5 text-sm border border-[var(--line)] rounded-xl bg-white text-[var(--ink)] placeholder-[var(--ink-faint)] focus:outline-none focus:border-[var(--accent)] transition-colors"
             bind:value={link}
             placeholder="https://..."
           />
@@ -324,7 +392,7 @@
             </div>
           {/if}
           <label
-            class="flex items-center gap-2 px-3 py-2 rounded-xl border border-dashed border-[var(--line-strong)] text-xs text-[var(--ink-faint)] hover:border-[var(--accent)] hover:text-[var(--accent)] cursor-pointer transition-colors"
+            class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-dashed border-[var(--line-strong)] text-xs text-[var(--ink-faint)] hover:border-[var(--accent)] hover:text-[var(--accent)] cursor-pointer transition-colors"
           >
             <i class="fa-solid fa-image"></i>
             Tambah gambar atau tempel (Ctrl+V)
