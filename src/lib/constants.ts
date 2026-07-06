@@ -78,24 +78,19 @@ export const MASTER_CONFIG: Record<MasterType, MasterConfigItem> = {
 };
 
 export const DEFAULT_STATUSES = [
-  { name: 'Backlog', color: '#A8A6BC', sort_order: 0 },
-  { name: 'To Do', color: '#3B7FD4', sort_order: 1 },
-  { name: 'In Progress', color: '#F0A020', sort_order: 2 },
-  { name: 'Review', color: '#D05C8E', sort_order: 3 },
-  { name: 'Done', color: '#2EA878', sort_order: 4 },
+  { name: 'To Do', color: '#3B7FD4', sort_order: 0 },
+  { name: 'In Progress', color: '#F0A020', sort_order: 1 },
+  { name: 'Done', color: '#2EA878', sort_order: 2 },
 ];
 
 export const DEFAULT_CATEGORIES = [
   { name: 'Umum', color: '#3B7FD4', sort_order: 0 },
   { name: 'Desain', color: '#D05C8E', sort_order: 1 },
-  { name: 'Development', color: '#EA4E2C', sort_order: 2 },
-  { name: 'Marketing', color: '#F0A020', sort_order: 3 },
-  { name: 'Konten', color: '#2EA878', sort_order: 4 },
+  { name: 'Konten', color: '#2EA878', sort_order: 2 },
 ];
 
 export const DEFAULT_PRIORITIES = [
   { name: 'Rendah', color: '#2EA878', sort_order: 0 },
   { name: 'Sedang', color: '#F0A020', sort_order: 1 },
   { name: 'Tinggi', color: '#EA4E2C', sort_order: 2 },
-  { name: 'Kritis', color: '#D94040', sort_order: 3 },
 ];
