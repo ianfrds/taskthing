@@ -1,6 +1,6 @@
 <script lang="ts">
   import { projects } from '$lib/stores/app.store';
-  import { createProject, updateProject } from '$lib/db/projects';
+  import { createProject, updateProject, fetchProjectData } from '$lib/db/projects';
   import { toast } from '$lib/stores/toast.store';
   import { COLORS, PROJECT_ICONS } from '$lib/constants';
   import ColorPicker from '$components/ui/ColorPicker.svelte';
@@ -52,7 +52,9 @@
         onSaved?.(updated as Project);
       } else {
         const created = await createProject({ name: name.trim(), description: description.trim(), color });
-        const full: Project = { ...created, todos: [], statuses: [], categories: [], priorities: [], members: [], resources: [] };
+        // Fetch default data yang baru di-insert (statuses, categories, priorities)
+        const relational = await fetchProjectData(created.id);
+        const full: Project = { ...created, ...relational };
         projects.update((list) => [...list, full]);
         toast.success('Proyek baru berhasil dibuat.');
         onSaved?.(full);
