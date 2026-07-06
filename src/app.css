@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #F2F2F7;
+  --shell: #FFFFFF;
+  --card: #FFFFFF;
+  --card-soft: #F7F7FB;
+  --card-dark: #16151F;
+  --ink: #1A1819;
+  --ink-soft: #6A6880;
+  --ink-faint: #A8A6BC;
+  --ink-on-dark: #FFFFFF;
+  --ink-on-dark-soft: #A29EBE;
+  --line: #EAEAF2;
+  --line-strong: #D8D7E6;
+  --accent: #EA4E2C;
+  --accent-deep: #C73C1C;
+  --accent-soft: #FFF0EC;
+  --accent-mid: #F26244;
+  --sidebar-bg: #FFFFFF;
+  --sidebar-border: #EAEAF2;
+  --sidebar-icon: #6A6880;
+  --sidebar-icon-hover: #1A1819;
+  --sidebar-active-bg: #F0F0F4;
+  --sidebar-active-text: #2D2B3A;
+  --green: #2EA878;
+  --green-soft: #E3F5EE;
+  --green-deep: #1A7050;
+  --blue: #3B7FD4;
+  --blue-soft: #E4EDFB;
+  --blue-deep: #1F5499;
+  --orange: #F0A020;
+  --orange-soft: #FEF3DC;
+  --orange-deep: #8C5E0A;
+  --pink: #D05C8E;
+  --pink-soft: #F9E5EF;
+  --pink-deep: #8A2F5A;
+  --amber: #D09030;
+  --amber-soft: #FDF0D6;
+  --amber-deep: #7A5410;
+  --red: #D94040;
+  --red-soft: #FDEAEA;
+  --red-deep: #9A2020;
+  --radius-xl: 22px;
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --shadow-card: 0 2px 12px rgba(20, 18, 40, 0.07);
+  --shadow-card-hover: 0 6px 22px rgba(20, 18, 40, 0.12);
+  --shadow-modal: 0 24px 60px rgba(20, 18, 40, 0.22);
+  --shadow-accent: 0 6px 20px rgba(234, 78, 44, 0.28);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
