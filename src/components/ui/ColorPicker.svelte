@@ -1,25 +1,42 @@
 <script lang="ts">
-  import type { ColorOption } from '$lib/types';
-  import { COLORS } from '$lib/constants';
-
   interface Props {
     value: string;
-    colors?: ColorOption[];
     onSelect: (hex: string) => void;
   }
 
-  let { value, colors = COLORS, onSelect }: Props = $props();
+  let { value, onSelect }: Props = $props();
+
+  const PRESETS = ['#F2703A', '#4B7FC9', '#3FA66C', '#E56C9C', '#F0A93C', '#A06CD5'];
+
+  function handleCustom(e: Event) {
+    const t = e.target as HTMLInputElement;
+    onSelect(t.value);
+  }
 </script>
 
-<div class="flex flex-wrap gap-2 p-1" role="group" aria-label="Pilih warna">
-  {#each colors as color}
-    <button
-      type="button"
-      class="w-7 h-7 rounded-full border-2 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[var(--accent)]"
-      style="background:{color.hex}; border-color:{value === color.hex ? color.hex : 'transparent'}; box-shadow:{value === color.hex ? '0 0 0 2px white, 0 0 0 4px ' + color.hex : 'none'};"
-      aria-label="Warna {color.name}"
-      aria-pressed={value === color.hex}
-      onclick={() => onSelect(color.hex)}
-    ></button>
-  {/each}
+<div class="flex items-center gap-3">
+  <div class="flex flex-wrap gap-2">
+    {#each PRESETS as hex}
+      <button
+        type="button"
+        class="w-7 h-7 rounded-lg border-2 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[var(--accent)]"
+        style="background:{hex}; border-color:{value === hex ? 'var(--ink)' : 'transparent'}; box-shadow:{value === hex ? '0 0 0 2px white' : 'none'};"
+        aria-label="Warna {hex}"
+        aria-pressed={value === hex}
+        onclick={() => onSelect(hex)}
+      ></button>
+    {/each}
+  </div>
+  <label
+    class="relative w-7 h-7 rounded-lg overflow-hidden cursor-pointer border-2 border-[var(--line)] hover:border-[var(--ink-soft)] transition-colors shrink-0"
+    aria-label="Pilih warna kustom"
+    style="background:{value}"
+  >
+    <input
+      type="color"
+      class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+      value={value}
+      oninput={handleCustom}
+    />
+  </label>
 </div>

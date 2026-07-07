@@ -3,8 +3,6 @@
   import { createTask, updateTask } from '$lib/db/tasks';
   import { toast } from '$lib/stores/toast.store';
   import { compressImage } from '$lib/utils';
-  import { COLORS } from '$lib/constants';
-  import ColorPicker from '$components/ui/ColorPicker.svelte';
   import Avatar from '$components/ui/Avatar.svelte';
   import Lightbox from '$components/ui/Lightbox.svelte';
   import type { Task } from '$lib/types';

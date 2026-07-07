@@ -13,11 +13,12 @@
   import MasterModal from '$components/modals/MasterModal.svelte';
   import ProfileModal from '$components/modals/ProfileModal.svelte';
   import LoadingScreen from '$components/ui/LoadingScreen.svelte';
-  import type { Resource } from '$lib/types';
+  import type { Project, Resource } from '$lib/types';
 
   let { children } = $props();
 
   let loading = $state(true);
+  let editProject = $state<Project | null>(null);
   let editResource = $state<Resource | null>(null);
 
   onMount(async () => {
@@ -29,10 +30,13 @@
     }
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
       const data = await fetchProjects();
       // Initialise each project with empty relational arrays
+      // Determine isShared — proyek milik user lain dianggap shared
       projects.set(data.map((p) => ({
         ...p,
+        isShared: user ? p.user_id !== user.id : false,
         todos: [],
         statuses: [],
         categories: [],
@@ -51,9 +55,19 @@
     modals.update((m) => ({ ...m, profile: true }));
   }
 
+  function handleEditProject(project: Project) {
+    editProject = project;
+    modals.update((m) => ({ ...m, project: true }));
+  }
+
   function handleEditResource(res: Resource) {
     editResource = res;
     modals.update((m) => ({ ...m, resource: true }));
+  }
+
+  function handleCloseProject() {
+    modals.update((m) => ({ ...m, project: false }));
+    editProject = null;
   }
 </script>
 
@@ -61,7 +75,7 @@
   <LoadingScreen message="Memuat proyek..." />
 {:else}
   <div class="flex h-screen overflow-hidden bg-[var(--bg)]">
-    <Sidebar />
+    <Sidebar onEditProject={handleEditProject} />
 
     <div class="flex-1 flex flex-col overflow-hidden">
       <Topbar onProfile={handleProfile} />
@@ -74,12 +88,14 @@
   <!-- Global Modals -->
   <ProjectModal
     open={$modals.project}
-    onClose={() => modals.update((m) => ({ ...m, project: false }))}
+    {editProject}
+    onClose={handleCloseProject}
     onSaved={async (proj) => {
       if (proj) {
         activeProjectId.set(proj.id);
         await goto(`/${proj.id}/tasks`);
       }
+      editProject = null;
     }}
   />
 

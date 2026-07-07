@@ -117,3 +117,53 @@ export async function getUserIdByEmail(email: string): Promise<string | null> {
   const { data } = await supabase.rpc('get_user_id_by_email', { email_input: email });
   return data ?? null;
 }
+
+export async function lookupUserByEmail(email: string): Promise<{ username: string; user_id: string } | null> {
+  const { data } = await supabase
+    .from('usernames')
+    .select('username, user_id')
+    .eq('email', email.toLowerCase().trim())
+    .maybeSingle();
+  return data ?? null;
+}
+
+// =========================================================
+// Activity log
+// =========================================================
+
+export async function logActivity(
+  action: string,
+  projectId: string | null,
+  meta: Record<string, unknown> = {}
+): Promise<void> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from('activity_log').insert({
+      user_id: user.id,
+      project_id: projectId,
+      action,
+      meta,
+    });
+  } catch {
+    // activity log failures are non-critical, silently ignore
+  }
+}
+
+export async function fetchActivityLog(limit = 50): Promise<import('$lib/types').ActivityLog[]> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from('activity_log')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error('fetchActivityLog:', error);
+    return [];
+  }
+  return (data ?? []) as import('$lib/types').ActivityLog[];
+}

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { searchQuery, projects, editingTaskId, modals } from '$lib/stores/app.store';
+  import { searchQuery, projects, editingTaskId, viewingTaskId, modals } from '$lib/stores/app.store';
   import { deleteTask } from '$lib/db/tasks';
   import { toast } from '$lib/stores/toast.store';
   import { formatDate, isOverdue } from '$lib/utils';
@@ -46,6 +46,11 @@
     editingTaskId.set(task.id);
     modals.update((m) => ({ ...m, task: true }));
   }
+
+  function handleOpenDetail(task: Task) {
+    viewingTaskId.set(task.id);
+    modals.update((m) => ({ ...m, taskDetail: true }));
+  }
 </script>
 
 {#if filtered.length === 0}
@@ -84,7 +89,14 @@
             {@const category = project.categories.find((c) => c.id === task.category_id)}
             {@const members = project.members.filter((m) => task.tag_ids?.includes(m.id))}
             {@const overdue = isOverdue(task.due)}
-            <tr class="hover:bg-[var(--card-soft)] transition-colors group">
+            <tr
+              class="hover:bg-[var(--card-soft)] transition-colors group cursor-pointer"
+              onclick={() => handleOpenDetail(task)}
+              onkeydown={(e) => e.key === 'Enter' && handleOpenDetail(task)}
+              tabindex="0"
+              role="button"
+              aria-label="Lihat detail tugas"
+            >
               <td class="px-4 py-3 font-medium text-[var(--ink)] max-w-[200px] truncate">{task.title}</td>
               <td class="px-4 py-3">
                 {#if status}
@@ -138,7 +150,7 @@
               </td>
               {#if isOwner}
                 <td class="px-4 py-3">
-                  <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onclick={(e) => e.stopPropagation()} role="presentation">
                     <button
                       class="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--ink-faint)] hover:bg-[var(--card-soft)] hover:text-[var(--ink)] transition-colors"
                       onclick={() => handleEdit(task)}

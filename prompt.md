@@ -1,4 +1,1 @@
-perbaiki UI nya agar sama dengan design system dan warna komponen2nya.
-Tombol proyek baru tidak perlu ada di header
-di sidebar tombol proyek baru buat primary diatas menu dashboard, hapus tombol proyek baru yang dibawah sidebar.
-
+di sidebar tambahkan menu bernama calendar yang ada di bawah dashboard, menu kalender ini nantinya full page yang berisi agenda dari to do yang memiliki tenggat waktu, kalender ini berbasis hari, minggu, hingga bulan atau mirip dengan google kalender lah

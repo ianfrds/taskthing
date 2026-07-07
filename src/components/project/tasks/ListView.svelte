@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { searchQuery, todoFilter, projects, editingTaskId, modals } from '$lib/stores/app.store';
+  import { searchQuery, todoFilter, projects, editingTaskId, viewingTaskId, modals } from '$lib/stores/app.store';
   import { deleteTask } from '$lib/db/tasks';
   import { toast } from '$lib/stores/toast.store';
   import { formatDate, isOverdue } from '$lib/utils';
@@ -57,6 +57,11 @@
     editingTaskId.set(task.id);
     modals.update((m) => ({ ...m, task: true }));
   }
+
+  function handleOpenDetail(task: Task) {
+    viewingTaskId.set(task.id);
+    modals.update((m) => ({ ...m, taskDetail: true }));
+  }
 </script>
 
 <div class="flex flex-col gap-4">
@@ -103,7 +108,14 @@
               {@const category = project.categories.find((c) => c.id === task.category_id)}
               {@const members = project.members.filter((m) => task.tag_ids?.includes(m.id))}
               {@const overdue = isOverdue(task.due)}
-              <li class="flex items-center gap-3 px-4 py-3 hover:bg-[var(--card-soft)] transition-colors group">
+              <li
+                class="flex items-center gap-3 px-4 py-3 hover:bg-[var(--card-soft)] transition-colors group cursor-pointer"
+                onclick={() => handleOpenDetail(task)}
+                onkeydown={(e) => e.key === 'Enter' && handleOpenDetail(task)}
+                role="button"
+                tabindex="0"
+                aria-label="Lihat detail tugas"
+              >
                 <div class="flex-1 min-w-0 flex flex-col gap-1">
                   <span class="text-sm font-medium text-[var(--ink)] truncate">{task.title}</span>
                   <div class="flex flex-wrap gap-1.5 items-center">
@@ -129,7 +141,7 @@
                   </div>
                 {/if}
                 {#if isOwner}
-                  <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onclick={(e) => e.stopPropagation()} role="presentation">
                     <button
                       class="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--ink-faint)] hover:bg-[var(--card-soft)] hover:text-[var(--ink)] transition-colors"
                       onclick={() => handleEdit(task)}

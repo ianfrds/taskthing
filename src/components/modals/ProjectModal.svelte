@@ -2,7 +2,7 @@
   import { projects } from '$lib/stores/app.store';
   import { createProject, updateProject, fetchProjectData } from '$lib/db/projects';
   import { toast } from '$lib/stores/toast.store';
-  import { COLORS, PROJECT_ICONS } from '$lib/constants';
+  import { COLORS } from '$lib/constants';
   import ColorPicker from '$components/ui/ColorPicker.svelte';
   import type { Project } from '$lib/types';
 
@@ -18,7 +18,6 @@
   let name = $state('');
   let description = $state('');
   let color = $state(COLORS[0].hex);
-  let icon = $state(PROJECT_ICONS[0]);
   let loading = $state(false);
   let error = $state('');
 
@@ -28,12 +27,10 @@
       name = editProject.name;
       description = editProject.description;
       color = editProject.color;
-      icon = editProject.icon;
     } else {
       name = '';
       description = '';
       color = COLORS[Math.floor(Math.random() * COLORS.length)].hex;
-      icon = PROJECT_ICONS[Math.floor(Math.random() * PROJECT_ICONS.length)];
     }
     error = '';
   });
@@ -44,7 +41,7 @@
     error = '';
     try {
       if (editProject) {
-        const updated = await updateProject(editProject.id, { name: name.trim(), description: description.trim(), color, icon });
+        const updated = await updateProject(editProject.id, { name: name.trim(), description: description.trim(), color });
         projects.update((list) =>
           list.map((p) => (p.id === updated.id ? { ...p, ...updated } : p))
         );
@@ -105,7 +102,7 @@
       <!-- Preview -->
       <div class="flex items-center gap-3 p-3 bg-[var(--card-soft)] rounded-xl">
         <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0" style="background:{color}1c; color:{color};">
-          <i class="fa-solid {icon}"></i>
+          <i class="fa-solid fa-folder"></i>
         </div>
         <div>
           <p class="text-sm font-semibold text-[var(--ink)] truncate">{name || 'Nama proyek'}</p>
@@ -143,24 +140,6 @@
         <div class="flex flex-col gap-1">
           <span class="text-xs font-medium text-[var(--ink-soft)]">Warna</span>
           <ColorPicker value={color} onSelect={(hex) => (color = hex)} />
-        </div>
-
-        <!-- Icon picker -->
-        <div class="flex flex-col gap-1">
-          <span class="text-xs font-medium text-[var(--ink-soft)]">Ikon</span>
-          <div class="flex gap-2 flex-wrap">
-            {#each PROJECT_ICONS as ic}
-              <button
-                type="button"
-                class="w-9 h-9 rounded-xl flex items-center justify-center text-base transition-colors {icon === ic ? 'bg-[var(--accent)] text-white' : 'bg-[var(--card-soft)] text-[var(--ink-soft)] hover:bg-[var(--line)]'}"
-                onclick={() => (icon = ic)}
-                aria-label="Ikon {ic}"
-                aria-pressed={icon === ic}
-              >
-                <i class="fa-solid {ic}"></i>
-              </button>
-            {/each}
-          </div>
         </div>
       </div>
 

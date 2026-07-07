@@ -4,7 +4,7 @@
 
 import { supabase } from '$lib/supabase';
 import { withRetry } from '$lib/utils';
-import { PROJECT_ICONS, DEFAULT_STATUSES, DEFAULT_CATEGORIES, DEFAULT_PRIORITIES } from '$lib/constants';
+import { DEFAULT_STATUSES, DEFAULT_CATEGORIES, DEFAULT_PRIORITIES } from '$lib/constants';
 import type { Project, CreateProjectPayload } from '$lib/types';
 
 export async function fetchProjects(): Promise<Project[]> {
@@ -13,6 +13,7 @@ export async function fetchProjects(): Promise<Project[]> {
       const { data, error } = await supabase
         .from('projects')
         .select('*')
+        .eq('is_archived', false)
         .order('created_at', { ascending: true });
       if (error) {
         console.error('db.fetchProjects:', error);
@@ -32,7 +33,7 @@ export async function createProject(payload: CreateProjectPayload): Promise<Proj
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User tidak terautentikasi');
 
-      const icon = PROJECT_ICONS[Math.floor(Math.random() * PROJECT_ICONS.length)];
+      const icon = 'fa-folder';
       const { data: project, error } = await supabase
         .from('projects')
         .insert({ ...payload, icon, user_id: user.id })
@@ -64,6 +65,32 @@ export async function createProject(payload: CreateProjectPayload): Promise<Proj
   }
 }
 
+export async function archiveProject(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('projects')
+    .update({ is_archived: true })
+    .eq('id', id);
+  if (error) throw error;
+}
+
+export async function restoreProject(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('projects')
+    .update({ is_archived: false })
+    .eq('id', id);
+  if (error) throw error;
+}
+
+export async function fetchArchivedProjects(): Promise<Project[]> {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('is_archived', true)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Project[];
+}
+
 export async function updateProject(id: string, updates: Partial<Project>): Promise<Project> {
   try {
     return await withRetry(async () => {
@@ -88,6 +115,13 @@ export async function updateProject(id: string, updates: Partial<Project>): Prom
 export async function deleteProject(id: string): Promise<void> {
   try {
     return await withRetry(async () => {
+      // Hapus semua data terkait dulu (karena FK tanpa CASCADE)
+      const relatedTables = ['todos', 'statuses', 'categories', 'priorities', 'members', 'resources'];
+      await Promise.all(
+        relatedTables.map((table) =>
+          supabase.from(table).delete().eq('project_id', id)
+        )
+      );
       const { error } = await supabase.from('projects').delete().eq('id', id);
       if (error) {
         console.error('db.deleteProject:', error);

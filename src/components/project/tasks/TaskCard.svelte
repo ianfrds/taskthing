@@ -2,7 +2,7 @@
   import { activeProject, projects, editingTaskId, viewingTaskId, modals } from '$lib/stores/app.store';
   import { deleteTask } from '$lib/db/tasks';
   import { toast } from '$lib/stores/toast.store';
-  import { formatDate, isOverdue } from '$lib/utils';
+  import { formatDate, isOverdue, parseHostname } from '$lib/utils';
   import Badge from '$components/ui/Badge.svelte';
   import Avatar from '$components/ui/Avatar.svelte';
   import ConfirmDialog from '$components/ui/ConfirmDialog.svelte';
@@ -124,17 +124,21 @@
 
   <!-- Preview: attachment/link indicator -->
   {#if task.link || (task.images && task.images.length > 0)}
-    <div class="flex items-center gap-2 text-[10px] text-[var(--ink-faint)]">
-      {#if task.link}
-        <span class="flex items-center gap-1">
-          <i class="fa-solid fa-link"></i>
-          Tautan
-        </span>
-      {/if}
+    <div class="flex items-center gap-1.5">
       {#if task.images && task.images.length > 0}
-        <span class="flex items-center gap-1">
-          <i class="fa-solid fa-image"></i>
-          {task.images.length} gambar
+        <div class="flex items-center gap-1">
+          {#each task.images.slice(0, 3) as img}
+            <img src={img} alt="" class="w-7 h-7 rounded-md object-cover border border-[var(--line)]" />
+          {/each}
+          {#if task.images.length > 3}
+            <span class="text-[10px] text-[var(--ink-faint)] font-medium">+{task.images.length - 3}</span>
+          {/if}
+        </div>
+      {/if}
+      {#if task.link}
+        <span class="flex items-center gap-1 text-[10px] text-[var(--ink-faint)]">
+          <i class="fa-solid fa-link"></i>
+          <span class="truncate max-w-[100px]">{parseHostname(task.link)}</span>
         </span>
       {/if}
     </div>

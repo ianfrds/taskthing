@@ -88,7 +88,7 @@
     <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
 
     <!-- Panel -->
-    <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-[var(--shadow-modal)] flex flex-col overflow-hidden max-h-[90vh]">
+    <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-[var(--shadow-modal)] flex flex-col max-h-[90vh]">
 
       <!-- Header -->
       <div class="flex items-start gap-3 px-6 pt-5 pb-4 border-b border-[var(--line)] shrink-0">
@@ -100,37 +100,17 @@
             {task.title}
           </h2>
         </div>
-        <!-- Action buttons -->
-        <div class="flex items-center gap-1.5 shrink-0 mt-0.5">
-          <button
-            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--accent)] text-white hover:bg-[var(--accent-deep)] transition-colors shadow-[var(--shadow-accent)]"
-            onclick={handleEdit}
-            aria-label="Edit tugas"
-          >
-            <i class="fa-solid fa-pen text-[10px]"></i>
-            Edit
-          </button>
-          <button
-            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--red-soft)] text-[var(--red)] hover:bg-[var(--red)] hover:text-white transition-colors"
-            onclick={handleDeleteClick}
-            disabled={deleting}
-            aria-label="Hapus tugas"
-          >
-            <i class="fa-solid fa-trash text-[10px]"></i>
-            Hapus
-          </button>
-          <button
-            class="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--ink-faint)] hover:bg-[var(--card-soft)] hover:text-[var(--ink)] transition-colors ml-1"
-            onclick={onClose}
-            aria-label="Tutup"
-          >
-            <i class="fa-solid fa-xmark text-sm"></i>
-          </button>
-        </div>
+        <button
+          class="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--ink-faint)] hover:bg-[var(--card-soft)] hover:text-[var(--ink)] transition-colors shrink-0"
+          onclick={onClose}
+          aria-label="Tutup"
+        >
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
       </div>
 
-      <!-- Body -->
-      <div class="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
+      <!-- Body (scrollable) -->
+      <div class="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5" style="max-height: calc(90vh - 140px);">
 
         <!-- Badges row: status, priority, category -->
         <div class="flex flex-wrap gap-2">
@@ -244,6 +224,27 @@
           </div>
         {/if}
 
+      </div>
+
+      <!-- Footer actions -->
+      <div class="flex items-center gap-3 px-6 py-4 border-t border-[var(--line)] shrink-0">
+        <button
+          class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--accent)] text-white text-sm font-semibold hover:bg-[var(--accent-deep)] transition-colors shadow-[var(--shadow-accent)]"
+          onclick={handleEdit}
+          aria-label="Edit tugas"
+        >
+          <i class="fa-solid fa-pen text-xs"></i>
+          Edit
+        </button>
+        <button
+          class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[var(--line)] text-[var(--ink-soft)] text-sm font-semibold hover:bg-[var(--red-soft)] hover:text-[var(--red)] transition-colors"
+          onclick={handleDeleteClick}
+          disabled={deleting}
+          aria-label="Hapus tugas"
+        >
+          <i class="fa-solid fa-trash text-xs"></i>
+          Hapus
+        </button>
       </div>
     </div>
   </div>

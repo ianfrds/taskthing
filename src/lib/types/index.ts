@@ -2,6 +2,19 @@
 // types/index.ts — Semua TypeScript interfaces & types
 // =========================================================
 
+export interface ActivityLog {
+  id: string;
+  user_id: string;
+  project_id: string | null;
+  action: string;
+  meta: Record<string, unknown>;
+  created_at: string;
+  // joined
+  project_name?: string;
+  project_color?: string;
+  username?: string;
+}
+
 export interface Project {
   id: string;
   user_id: string;
@@ -10,6 +23,7 @@ export interface Project {
   color: string;
   icon: string;
   starred: boolean;
+  is_archived: boolean;
   disable_categories: boolean;
   disable_priorities: boolean;
   created_at: string;
