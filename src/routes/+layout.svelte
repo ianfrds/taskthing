@@ -11,7 +11,7 @@
 
   let checking = $state(true);
 
-  const PUBLIC_ROUTES = ['/login', '/register'];
+  const PUBLIC_ROUTES = ['/login', '/register', '/design-system'];
 
   onMount(() => {
     // Check initial session

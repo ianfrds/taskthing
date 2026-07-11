@@ -1,8 +1,10 @@
 <script lang="ts">
   import { activeProject, projects, editingTaskId } from '$lib/stores/app.store';
   import { createTask, updateTask } from '$lib/db/tasks';
+  import { notifications } from '$lib/stores/notification.store';
   import { toast } from '$lib/stores/toast.store';
   import { compressImage } from '$lib/utils';
+  import { supabase } from '$lib/supabase';
   import Avatar from '$components/ui/Avatar.svelte';
   import Lightbox from '$components/ui/Lightbox.svelte';
   import type { Task } from '$lib/types';
@@ -81,6 +83,19 @@
     tagIds = tagIds.includes(id) ? tagIds.filter((x) => x !== id) : [...tagIds, id];
   }
 
+  async function checkTaggedNotification(task: import('$lib/types').Task) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) return;
+      const isTagged = task.tag_ids.some((tid) =>
+        proj?.members.some((m) => m.id === tid && m.email === user!.email)
+      );
+      if (isTagged) {
+        notifications.addTagged(task.title, proj!.id, proj!.name, task.id);
+      }
+    } catch { /* non-critical */ }
+  }
+
   function removeImage(idx: number) {
     pendingImages = pendingImages.filter((_, i) => i !== idx);
   }
@@ -113,6 +128,7 @@
           )
         );
         toast.success('Tugas berhasil diperbarui.');
+        checkTaggedNotification(updated);
       } else {
         const created = await createTask(proj.id, payload);
         projects.update((list) =>
@@ -121,6 +137,7 @@
           )
         );
         toast.success('Tugas baru berhasil dibuat.');
+        checkTaggedNotification(created);
       }
       onClose();
     } catch (e: unknown) {

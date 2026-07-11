@@ -15,6 +15,18 @@ export interface ActivityLog {
   username?: string;
 }
 
+export interface AppNotification {
+  id: string;
+  type: 'due_soon' | 'tagged';
+  title: string;
+  message: string;
+  projectId: string;
+  projectName: string;
+  taskId: string | null;
+  isRead: boolean;
+  createdAt: string;
+}
+
 export interface Project {
   id: string;
   user_id: string;

@@ -4,6 +4,7 @@
   import { projects, activeProjectId, modals } from '$lib/stores/app.store';
   import { fetchProjects } from '$lib/db/projects';
   import { supabase } from '$lib/supabase';
+  import { notifications } from '$lib/stores/notification.store';
   import Sidebar from '$components/layout/Sidebar.svelte';
   import Topbar from '$components/layout/Topbar.svelte';
   import ProjectModal from '$components/modals/ProjectModal.svelte';
@@ -44,6 +45,8 @@
         members: [],
         resources: [],
       })));
+      notifications.init();
+      notifications.startPolling();
     } catch (e) {
       console.error('AppLayout.loadProjects:', e);
     } finally {
